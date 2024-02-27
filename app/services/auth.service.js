@@ -29,6 +29,20 @@ class AuthService {
     if (res.length == 0) return null;
     return res;
   }
+  async findByEmail(email) {
+    const res = await this.find({
+      email: { $regex: new RegExp(email) },
+    });
+    if (res.length == 0) return null;
+    return res;
+  }
+  async findByPhone(phone) {
+    const res = await this.find({
+      phone: { $regex: new RegExp(phone) },
+    });
+    if (res.length == 0) return null;
+    return res;
+  }
   async _generateUserCode() {
     let code = await this.user.count();
     return "U" + code.toString().padStart(6, "0");
