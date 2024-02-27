@@ -41,7 +41,7 @@ exports.register = async (req, res, next) => {
       return next(new ApiError(400, "Invalid email address"));
     const existEmail = await authService.findByEmail(email);
     if (existEmail) {
-      return next(new ApiError(400, "Email already exists"));
+      return next(new ApiError(400, "Email already exists."));
     }
     //Phone number
     const validatePhone = (phone) => {
@@ -53,15 +53,15 @@ exports.register = async (req, res, next) => {
       return next(new ApiError(400, "Invalid phone number"));
     const existPhone = await authService.findByPhone(phone);
     if (existPhone) {
-      return next(new ApiError(400, "Phone number already exists"));
+      return next(new ApiError(400, "Phone number already exists."));
     }
 
     const document = await authService.create(req.body);
     if (!document)
-      return next(new ApiError(400, "Could not create a new user"));
+      return next(new ApiError(400, "Could not create a new user."));
     return res.send(document);
   } catch (error) {
-    console.log(error);
-    return next(new ApiError(500, "An error occurred while creating user"));
+    // console.log(error);
+    return next(new ApiError(500, "An error occurred while creating user."));
   }
 };

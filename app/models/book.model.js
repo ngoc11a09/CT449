@@ -1,6 +1,6 @@
 const { model, Schema } = require("mongoose");
 
-const userSchema = new Schema(
+const bookSchema = new Schema(
   {
     code: {
       type: String,
@@ -12,21 +12,19 @@ const userSchema = new Schema(
       require: true,
     },
     price: {
-      type: int,
+      type: Number,
       require: true,
     },
     quantity: {
-      type: int,
+      type: Number,
       require: true,
     },
     publishYear: {
-      type: int,
+      type: Number,
       require: true,
     },
     publishCode: {
       type: String,
-      require: true,
-      unique: true,
     },
     country: {
       type: String,
@@ -40,4 +38,4 @@ const userSchema = new Schema(
   },
   { timestamps: true }
 );
-module.exports = model("User", userSchema);
+module.exports = model("Book", bookSchema);

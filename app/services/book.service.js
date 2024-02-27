@@ -1,5 +1,5 @@
 const { ObjectId } = require("mongodb");
-
+const Book = require("../models/book.model");
 class BookService {
   constructor(client) {
     this.book = client.db.collection("books");
@@ -14,24 +14,29 @@ class BookService {
   }
   async create(payload) {
     const filtered_data = this.filterUndefinedField(payload);
-    const result = await this.book.insertOne(filtered_data);
+    const instance = new Book(filtered_data);
+    const result = await instance.save();
 
     return result;
   }
 
-  async find(filter) {
-    const cursor = await this.book.find(filter);
-    return await cursor.toArray();
+  async findAllBooks() {
+    return await Book.find();
   }
-
+  async findByCode(code) {
+    const res = await Book.findOne({
+      code: { $regex: new RegExp(code), $options: "i" },
+    });
+    return res;
+  }
   async findByName(name) {
-    return await this.find({
+    return await Book.find({
       name: { $regex: new RegExp(name), $options: "i" },
     });
   }
 
   async findById(id) {
-    return await this.book.findOne({
+    return await Book.findOne({
       _id: ObjectId.isValid(id) ? new ObjectId(`${id}`) : null,
     });
   }
@@ -41,23 +46,19 @@ class BookService {
       _id: ObjectId.isValid(id) ? new ObjectId(`${id}`) : null,
     };
     const update = this.filterUndefinedField(payload);
-    const result = await this.book.findOneAndUpdate(
-      filter,
-      { $set: update },
-      { returnDocument: "after" }
-    );
+    const result = await Book.findOneAndUpdate(filter, update, { new: true });
     return result;
   }
 
   async delete(id) {
-    const result = await this.book.findOneAndDelete({
+    const result = await Book.deleteOne({
       _id: ObjectId.isValid(id) ? new ObjectId(`${id}`) : null,
     });
     return result;
   }
 
   async deleteAll() {
-    const result = await this.book.deleteMany({});
+    const result = await Book.deleteMany();
     return result.deletedCount;
   }
 }

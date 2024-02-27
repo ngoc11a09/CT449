@@ -17,27 +17,28 @@ class AuthService {
     return user;
   }
 
-  async find(filter) {
-    const cursor = await this.user.find(filter);
-    return await cursor.toArray();
+  async findAllUsers() {
+    const res = await User.find();
+    return res;
   }
 
   async findByUsername(username) {
-    const res = await this.find({
+    const res = await User.find({
       username: { $regex: new RegExp(username) },
     });
     if (res.length == 0) return null;
     return res;
   }
+
   async findByEmail(email) {
-    const res = await this.find({
+    const res = await User.find({
       email: { $regex: new RegExp(email) },
     });
     if (res.length == 0) return null;
     return res;
   }
   async findByPhone(phone) {
-    const res = await this.find({
+    const res = await User.find({
       phone: { $regex: new RegExp(phone) },
     });
     if (res.length == 0) return null;
@@ -48,6 +49,7 @@ class AuthService {
     return "U" + code.toString().padStart(6, "0");
   }
   async create(payload) {
+    payload = this.filterUndefinedField(payload);
     payload.username = payload.username.trim();
     payload.password = await bcrypt.hash(payload.password, 10);
     payload.birthday = moment(payload.birthday, "DD/MM/YYYY");
