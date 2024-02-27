@@ -2,7 +2,7 @@ const { ObjectId } = require("mongodb");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const User = require("../models/user.model");
-
+const moment = require("moment");
 class AuthService {
   constructor(client) {
     // console.log("Service >>>> ", client);
@@ -23,30 +23,38 @@ class AuthService {
   }
 
   async findByUsername(username) {
-    return await this.find({
+    const res = await this.find({
       username: { $regex: new RegExp(username) },
     });
+    if (res.length == 0) return null;
+    return res;
   }
-
-  async findById(id) {
-    return await this.user.findOne({
-      _id: ObjectId.isValid(id) ? new ObjectId(`${id}`) : null,
-    });
+  async _generateUserCode() {
+    let code = await this.user.count();
+    return "U" + code.toString().padStart(6, "0");
   }
-
   async create(payload) {
-    const { username, password } = payload;
+    payload.username = payload.username.trim();
+    payload.password = await bcrypt.hash(payload.password, 10);
+    payload.birthday = moment(payload.birthday, "DD/MM/YYYY");
+    payload.code = await this._generateUserCode();
 
-    const hashedPass = await bcrypt.hash(password, 10);
+    const instance = new User(payload);
 
-    const newUser = new User({
-      username: username.trim(),
-      password: hashedPass,
-    });
-    console.log("saveuser: ", newUser.save);
-    const savedUser = await newUser.save();
-    const token = jwt.sign(savedUser, "tokensecret");
-    return savedUser;
+    const token = jwt.sign(
+      {
+        role: instance.role,
+        username: instance.username,
+        email: instance.username,
+        code: instance.code,
+      },
+      "JWT_SECRET"
+    );
+    const RF = jwt.sign({ id: instance.code }, "sdalaskjdlk");
+
+    instance.refreshToken = RF;
+    await instance.save();
+    return { token };
   }
 }
 

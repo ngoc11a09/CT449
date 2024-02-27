@@ -1,56 +1,39 @@
 const ApiError = require("../api-error");
 const AuthService = require("../services/auth.service");
 const Mongoose = require("../utils/mongodb.util");
-
-exports.create = async (req, res, next) => {
+exports.register = async (req, res, next) => {
   try {
     const authService = new AuthService(Mongoose.client);
     const { username, password } = req.body;
     if (!username || !password) {
-      return next(new ApiError(400, "username and password are empty"));
+      return next(new ApiError(400, "Username and password are required."));
     }
-    if (username.trim().length < 4) {
+    if (username.trim().length < 4 || username.trim().length > 25) {
       return next(
-        new ApiError(400, "username must be longer than 4 characters")
-      );
-    }
-    if (username.trim().length > 25) {
-      return next(
-        new ApiError(400, "username must be shorter than 25 characters")
-      );
-    }
-    if (password.trim().length < 6) {
-      return next(
-        new ApiError(400, "password must be longer than 6 characters")
+        new ApiError(400, "Usernames can be 4 to 25 characters long.")
       );
     }
 
-    const existUser = await authService.findByUsername({ username });
-    if (existUser) {
-      return next(new ApiError(400, "username already exists"));
+    if (password.trim().length < 6 || password.trim().length > 200) {
+      return next(
+        new ApiError(
+          400,
+          "Passwords must be between 6 and 200 characters long."
+        )
+      );
     }
+
+    const existUser = await authService.findByUsername(username);
+    if (existUser) {
+      return next(new ApiError(400, "This username is already in use."));
+    }
+
     const document = await authService.create(req.body);
-    if (!document) return next(new ApiError(400, "Could not create new user"));
+    if (!document)
+      return next(new ApiError(400, "Could not create a new user"));
     return res.send(document);
   } catch (error) {
+    console.log(error);
     return next(new ApiError(500, "An error occurred while creating user"));
   }
-};
-
-exports.findAll = async (req, res, next) => {
-  let documents = [];
-
-  try {
-    const authService = new AuthService(Mongoose.client);
-    const { username } = req.query;
-
-    if (username) {
-      documents = await authService.findByUsername(username);
-    } else {
-      documents = await authService.find({});
-    }
-  } catch (error) {
-    return next(new ApiError(500, "An error occured while get all users"));
-  }
-  return res.send(documents);
 };

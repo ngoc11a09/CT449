@@ -7,51 +7,35 @@ const userSchema = new Schema(
       require: true,
       unique: true,
     },
-    role: {
-      type: String,
-      require: true,
-      default: "user",
-    },
-    username: {
-      type: String,
-      require: true,
-      unique: true,
-    },
-    password: {
-      type: String,
-      require: true,
-    },
-    email: {
-      type: String,
-      require: true,
-      unique: true,
-    },
-    familyName: {
-      type: String,
-    },
     name: {
       type: String,
       require: true,
     },
-    birthday: {
-      type: Date,
+    price: {
+      type: int,
       require: true,
     },
-    gender: {
-      type: String,
+    quantity: {
+      type: int,
       require: true,
     },
-    phone: {
+    publishYear: {
+      type: int,
+      require: true,
+    },
+    publishCode: {
       type: String,
       require: true,
       unique: true,
     },
-    refreshToken: {
+    country: {
       type: String,
     },
-    isDeleted: {
-      type: Boolean,
-      default: false,
+    author: {
+      type: String,
+    },
+    position: {
+      type: String,
     },
   },
   { timestamps: true }
